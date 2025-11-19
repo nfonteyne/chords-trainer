@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Chord Trainer</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="container">
+    <h1>Chord Trainer</h1>
+
+    <div class="row">
+      <label class="label">Tempo (BPM)
+        <input id="bpm" type="number" min="20" max="300" step="1" value="80" />
+      </label>
+      <label class="label">Beats per chord
+        <input id="bpc" type="number" min="1" max="16" step="1" value="4" />
+      </label>
+      <button id="toggle" class="btn">Start</button>
+      <span id="status" class="subtle">Stopped</span>
+    </div>
+
+    <div class="row wrap">
+      <span class="label">Chord types</span>
+      <label class="chip"><input type="checkbox" data-type="major" checked /> Major</label>
+      <label class="chip"><input type="checkbox" data-type="minor" checked /> Minor</label>
+      <label class="chip"><input type="checkbox" data-type="dom7" checked /> 7 (dominant)</label>
+      <label class="chip"><input type="checkbox" data-type="maj7" /> Maj7</label>
+      <label class="chip"><input type="checkbox" data-type="min7" /> Min7</label>
+      <label class="chip"><input type="checkbox" data-type="sus2" /> Sus2</label>
+      <label class="chip"><input type="checkbox" data-type="sus4" /> Sus4</label>
+    </div>
+
+    <div class="row wrap">
+      <span class="label">Roots</span>
+      <!-- Toggle any roots you want to practice -->
+      <div id="roots"></div>
+    </div>
+
+    <div class="chord" id="chord">—</div>
+    <div class="subtle">Tip: change BPM or chord length and press Start.</div>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
+
