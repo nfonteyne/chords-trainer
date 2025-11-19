@@ -1,8 +1,23 @@
 services:
   web:
     image: nginx:alpine
-    ports:
-      - "8080:80"
+    container_name: chords-trainer
+    # ports:
+    # - "8080:80"
     volumes:
       - ./:/usr/share/nginx/html:ro
+    networks: 
+      - traefik-proxy
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik-proxy
+      - traefik.http.routers.chords-trainer.rule=Host(`chords-trainer.dandrove.com`)
+      - traefik.http.routers.chords-trainer.entrypoints=websecure
+      - traefik.http.routers.chords-trainer.tls=true
+      - traefik.http.routers.chords-trainer.tls.certresolver=myresolver
+      - traefik.http.services.chords-trainer.loadbalancer.server.port=80
     restart: unless-stopped
+
+networks:
+  traefik-proxy:
+    external: true
