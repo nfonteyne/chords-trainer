@@ -15,5 +15,6 @@ A tiny, no-build web app to practice playing chords on your instrument. It displ
 - Limit roots (e.g., only keys you’re working on)
 - Pure HTML/CSS/JS — no backend, no Node.js required
 
-<img width="1040" height="491" alt="image" src="https://github.com/user-attachments/assets/74b9b391-5def-4e11-82e5-8613077d27fb" />
+<img width="1023" height="483" alt="image" src="https://github.com/user-attachments/assets/40c606cb-2a91-4b86-b327-6383e2477dad" />
+
 
