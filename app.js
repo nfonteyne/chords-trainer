@@ -1,4 +1,5 @@
 (() => {
+  // Internal note names (always English internally)
   const ROOTS = ['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
   const CHORD_TYPES = {
     major: '',    // C
@@ -10,21 +11,47 @@
     sus4: 'sus4', // Csus4
   };
 
-  // DOM
+  // Language + localization mapping
+  let lang = 'en'; // 'en' or 'fr'
+  const NOTE_FR = {
+    C: 'Do', Db: 'Ré♭', D: 'Ré', Eb: 'Mi♭', E: 'Mi', F: 'Fa',
+    Gb: 'Sol♭', G: 'Sol', Ab: 'La♭', A: 'La', Bb: 'Si♭', B: 'Si'
+  };
+
+  // Single source of truth for the currently active chord (EN symbol)
+  let currentChord = null;
+
+  // DOM refs
   const elBpm = document.getElementById('bpm');
   const elBpc = document.getElementById('bpc');
   const elToggle = document.getElementById('toggle');
   const elStatus = document.getElementById('status');
   const elChord = document.getElementById('chord');
   const elRoots = document.getElementById('roots');
+  const elLang = document.getElementById('lang-toggle');
 
-  // Root toggles
+  // State
+  let isRunning = false;
+  let timer = null;
   const enabledRoots = new Set(ROOTS);
+  const selectedTypes = new Set();
+
+  // Initialize chord type checkboxes
+  document.querySelectorAll('input[type="checkbox"][data-type]').forEach(cb => {
+    if (cb.checked) selectedTypes.add(cb.dataset.type);
+    cb.addEventListener('change', () => {
+      if (cb.checked) selectedTypes.add(cb.dataset.type);
+      else selectedTypes.delete(cb.dataset.type);
+      if (isRunning) restart();
+    });
+  });
+
+  // Build root toggle buttons once
   for (const r of ROOTS) {
     const btn = document.createElement('button');
     btn.className = 'root-toggle active';
-    btn.textContent = r;
-    btn.dataset.root = r;
+    btn.textContent = r;        // will update on language change
+    btn.dataset.root = r;       // keep EN root internally
     btn.addEventListener('click', () => {
       if (enabledRoots.has(r)) {
         enabledRoots.delete(r);
@@ -38,26 +65,25 @@
     elRoots.appendChild(btn);
   }
 
-  // State
-  let isRunning = false;
-  let timer = null;
-
-  // Selected chord types via checkboxes
-  const selectedTypes = new Set();
-  document.querySelectorAll('input[type="checkbox"][data-type]').forEach(cb => {
-    if (cb.checked) selectedTypes.add(cb.dataset.type);
-    cb.addEventListener('change', () => {
-      if (cb.checked) selectedTypes.add(cb.dataset.type);
-      else selectedTypes.delete(cb.dataset.type);
-      if (isRunning) restart();
-    });
-  });
-
   // Controls
   elToggle.addEventListener('click', () => (isRunning ? stop() : start()));
-  elBpm.addEventListener('change', () => { elBpm.value = clamp(+elBpm.value || 80, 20, 300); if (isRunning) restart(); });
-  elBpc.addEventListener('change', () => { elBpc.value = clamp(+elBpc.value || 4, 1, 16); if (isRunning) restart(); });
+  elBpm.addEventListener('change', () => {
+    elBpm.value = clamp(+elBpm.value || 80, 20, 300);
+    if (isRunning) restart();
+  });
+  elBpc.addEventListener('change', () => {
+    elBpc.value = clamp(+elBpc.value || 4, 1, 16);
+    if (isRunning) restart();
+  });
 
+  elLang.addEventListener('click', () => {
+    lang = (lang === 'en') ? 'fr' : 'en';
+    elLang.textContent = (lang === 'en') ? 'EN' : 'FR';
+    relabelRootButtons();
+    renderChord(); // redisplay current chord in the new language
+  });
+
+  // Start/Stop/Restart
   function start() {
     if (!selectedTypes.size) return alert('Select at least one chord type.');
     if (!enabledRoots.size) return alert('Enable at least one root.');
@@ -75,13 +101,17 @@
     elToggle.classList.remove('stop');
     elStatus.textContent = 'Stopped';
     clearInterval(timer); timer = null;
+    currentChord = null;
+    renderChord();
   }
 
   function restart() { stop(); start(); }
 
+  // Core
   function showRandomChord() {
     const pool = buildPool();
-    elChord.textContent = pool[Math.floor(Math.random() * pool.length)];
+    currentChord = pool[Math.floor(Math.random() * pool.length)];
+    renderChord();
   }
 
   function buildPool() {
@@ -92,11 +122,34 @@
     return pool;
   }
 
+  function renderChord() {
+    elChord.textContent = currentChord ? localizeChord(currentChord) : '—';
+  }
+
+  function localizeChord(symbol) {
+    if (lang === 'en') return symbol;
+    // Match the longest possible root first (e.g., Db before D)
+    const root = ROOTS.slice().sort((a, b) => b.length - a.length).find(r => symbol.startsWith(r));
+    if (!root) return symbol;
+    const localized = NOTE_FR[root] || root;
+    return localized + symbol.slice(root.length);
+  }
+
+  function relabelRootButtons() {
+    document.querySelectorAll('#roots .root-toggle').forEach(btn => {
+      const r = btn.dataset.root; // EN
+      btn.textContent = (lang === 'fr') ? (NOTE_FR[r] || r) : r;
+    });
+  }
+
+  // Utils
   function updateStatus() {
     elStatus.textContent = `Running at ${elBpm.value} BPM, change every ${elBpc.value} beats`;
   }
-
   function beatsToMs(beats, bpm) { return Math.round((60000 / bpm) * beats); }
   function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
+
+  // Initial render
+  renderChord();
 })();
 

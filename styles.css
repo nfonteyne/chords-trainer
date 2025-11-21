@@ -23,7 +23,7 @@ body {
   border-radius: 16px;
   box-shadow: 0 20px 60px rgba(0,0,0,0.35);
 }
-h1 { margin-top: 0; font-size: 24px; letter-spacing: 0.3px; }
+h1 { margin: 0; font-size: 24px; letter-spacing: 0.3px; }
 .row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
 .wrap { flex-wrap: wrap; }
 .label { font-weight: 600; color: var(--text); display: inline-flex; gap: 8px; align-items: center; }
